@@ -17,3 +17,24 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
+
+class Task(db.Model):
+    __tablename__ = "task"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(
+        String(120),
+        nullable=False
+    )
+    completed: Mapped[bool] = mapped_column(
+        Boolean(),
+        nullable=False,
+        default=False
+    )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "completed": self.completed
+        }
