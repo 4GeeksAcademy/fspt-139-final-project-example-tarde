@@ -30,6 +30,12 @@ export const Navbar = () => {
 					>
 						Team
 					</Link>
+					<Link
+						className="nav-link"
+						to="/tasks"
+					>
+						Tasks
+					</Link>
 
 				</div>
 

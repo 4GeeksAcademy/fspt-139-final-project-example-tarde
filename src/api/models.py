@@ -34,12 +34,32 @@ class TeamMember(db.Model):
 
     role: Mapped[str] = mapped_column(
         String(120),
-        nullable=False
-    )
+        nullable=False)
 
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
-            "role": self.role
+            "role": self.role,
+        }
+
+class Task(db.Model):
+    __tablename__ = "task"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(
+        String(120),
+        nullable=False
+    )
+    completed: Mapped[bool] = mapped_column(
+        Boolean(),
+        nullable=False,
+        default=False
+    )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "completed": self.completed
         }

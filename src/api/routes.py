@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, TeamMember
+from api.models import db, User, TeamMember, Task
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy import select
@@ -33,7 +33,18 @@ def get_team():
     ).scalars().all()
 
     return jsonify(
-        [member.serialize() for member in members]
+        [member.serialize() for member in members])
+
+@api.route("/tasks", methods=["GET"])
+
+def get_tasks():
+
+    tasks = db.session.execute(
+        select(Task)
+    ).scalars().all()
+
+    return jsonify(
+        [task.serialize() for task in tasks]
     ), 200
 
 
@@ -44,13 +55,6 @@ def seed_database():
         "data"
     )
 
-    # with open(
-    #     os.path.join(base_path, "tasks.json"),
-    #     "r",
-    #     encoding="utf-8"
-    # ) as file:
-    #     tasks_data = json.load(file)
-
     with open(
         os.path.join(base_path, "team.json"),
         "r",
@@ -60,23 +64,6 @@ def seed_database():
 
     tasks_created = 0
     members_created = 0
-
-    # Tasks
-    # for task_data in tasks_data:
-    #     existing_task = db.session.execute(
-    #         select(Task).where(
-    #             Task.title == task_data["title"]
-    #         )
-    #     ).scalar_one_or_none()
-
-    #     if existing_task is None:
-    #         new_task = Task(
-    #             title=task_data["title"],
-    #             completed=task_data["completed"]
-    #         )
-
-    #         db.session.add(new_task)
-    #         tasks_created += 1
 
     # Team members
     for member_data in team_data:
@@ -95,13 +82,38 @@ def seed_database():
 
             db.session.add(new_member)
             members_created += 1
+    with open(
+        os.path.join(base_path, "tasks.json"),
+        "r",
+        encoding="utf-8"
+    ) as file:
+        tasks_data = json.load(file)
+
+    tasks_created = 0
+
+    # Tasks
+    for task_data in tasks_data:
+        existing_task = db.session.execute(
+            select(Task).where(
+                Task.title == task_data["title"]
+            )
+        ).scalar_one_or_none()
+
+        if existing_task is None:
+            new_task = Task(
+                title=task_data["title"],
+                completed=task_data["completed"]
+            )
+
+            db.session.add(new_task)
+            tasks_created += 1
 
     db.session.commit()
 
     return jsonify({
         "message": "Database seed completed",
         "created": {
-            # "tasks": tasks_created,
-            "team_members": members_created
+            "team_members": members_created,
+            "tasks": tasks_created,
         }
     }), 200

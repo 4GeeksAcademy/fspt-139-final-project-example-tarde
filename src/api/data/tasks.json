@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Create Git branch",
+    "completed": true
+  },
+  {
+    "title": "Open Pull Request",
+    "completed": false
+  },
+  {
+    "title": "Review teammate code",
+    "completed": false
+  },
+  {
+    "title": "Resolve merge conflict",
+    "completed": false
+  },
+  {
+    "title": "Merge feature into main",
+    "completed": false
+  }
+]
