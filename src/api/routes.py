@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Task
+from api.models import db, User, TeamMember, Task
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy import select
@@ -25,7 +25,18 @@ def handle_hello():
     return jsonify(response_body), 200
 
 
+@api.route("/team", methods=["GET"])
+def get_team():
+
+    members = db.session.execute(
+        select(TeamMember)
+    ).scalars().all()
+
+    return jsonify(
+        [member.serialize() for member in members])
+
 @api.route("/tasks", methods=["GET"])
+
 def get_tasks():
 
     tasks = db.session.execute(
@@ -44,6 +55,33 @@ def seed_database():
         "data"
     )
 
+    with open(
+        os.path.join(base_path, "team.json"),
+        "r",
+        encoding="utf-8"
+    ) as file:
+        team_data = json.load(file)
+
+    tasks_created = 0
+    members_created = 0
+
+    # Team members
+    for member_data in team_data:
+        existing_member = db.session.execute(
+            select(TeamMember).where(
+                TeamMember.name == member_data["name"],
+                TeamMember.role == member_data["role"]
+            )
+        ).scalar_one_or_none()
+
+        if existing_member is None:
+            new_member = TeamMember(
+                name=member_data["name"],
+                role=member_data["role"]
+            )
+
+            db.session.add(new_member)
+            members_created += 1
     with open(
         os.path.join(base_path, "tasks.json"),
         "r",
@@ -75,6 +113,7 @@ def seed_database():
     return jsonify({
         "message": "Database seed completed",
         "created": {
+            "team_members": members_created,
             "tasks": tasks_created,
         }
     }), 200

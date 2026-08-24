@@ -26,6 +26,12 @@ export const Navbar = () => {
 
 					<Link
 						className="nav-link"
+						to="/team"
+					>
+						Team
+					</Link>
+					<Link
+						className="nav-link"
 						to="/tasks"
 					>
 						Tasks
